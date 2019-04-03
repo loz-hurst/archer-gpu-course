@@ -30,9 +30,15 @@ static __constant__ int array_size;
 
 __global__ void reverseArray(int * d_in, int * d_out)
 {
+
+  __shared__ int tmp[THREADS_PER_BLOCK];
   int idx = blockIdx.x*blockDim.x + threadIdx.x;
 
-  d_out[idx] = d_in[array_size - (idx + 1)];
+  tmp[THREADS_PER_BLOCK - (threadIdx.x + 1)] = d_in[idx];
+
+  __syncthreads();
+
+  d_out[array_size - (blockIdx.x+1)*blockDim.x + threadIdx.x] = tmp[threadIdx.x];
 }
 
 
