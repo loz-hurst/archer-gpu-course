@@ -93,8 +93,8 @@ if ( N%THREADSPERBLOCK != 0 ){
 
 
   /* CUDA decomposition */
-    dim3 blocksPerGrid(N/THREADSPERBLOCK,1,1);
-    dim3 threadsPerBlock(THREADSPERBLOCK,1,1);
+    dim3 blocksPerGrid(N/sqrt(THREADSPERBLOCK), N/sqrt(THREADSPERBLOCK),1);
+    dim3 threadsPerBlock(sqrt(THREADSPERBLOCK),sqrt(THREADSPERBLOCK),1);
 
    printf("Blocks: %d %d %d\n",blocksPerGrid.x,blocksPerGrid.y,blocksPerGrid.z);
    printf("Threads per block: %d %d %d\n",threadsPerBlock.x,threadsPerBlock.y,threadsPerBlock.z);
