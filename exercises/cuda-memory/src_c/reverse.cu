@@ -23,16 +23,16 @@ void checkCUDAError(const char*);
 
 /* The number of integer elements in the array */
 
-#define ARRAY_SIZE 65536
+static __constant__ int array_size;
 
 /* Reverse the elements in the input array d_in.
- * The total number of threads should be ARRAY_SIZE. */
+ * The total number of threads should be size. */
 
 __global__ void reverseArray(int * d_in, int * d_out)
 {
   int idx = blockIdx.x*blockDim.x + threadIdx.x;
 
-  d_out[idx] = d_in[ARRAY_SIZE - (idx + 1)];
+  d_out[idx] = d_in[array_size - (idx + 1)];
 }
 
 
@@ -44,7 +44,8 @@ int main(int argc, char *argv[])
 
     int i;
     int ncorrect;
-    size_t sz = ARRAY_SIZE * sizeof(int);
+    int size = 65536;
+    size_t sz = size * sizeof(int);
 
     /* Print device details */
     int deviceNum;
@@ -68,10 +69,13 @@ int main(int argc, char *argv[])
     cudaMalloc(&d_out, sz);
 
     /* initialise host arrays */
-    for (i = 0; i < ARRAY_SIZE; i++) {
+    for (i = 0; i < size; i++) {
         h_in[i] = i;
         h_out[i] = 0;
     }
+
+    // Set constant
+    cudaMemcpyToSymbol(array_size, &size, sizeof(int));
 
     /* copy input array from host to GPU */
 
@@ -79,7 +83,7 @@ int main(int argc, char *argv[])
 
     /* run the kernel on the GPU */
 
-    dim3 blocksPerGrid(ARRAY_SIZE/THREADS_PER_BLOCK, 1, 1);
+    dim3 blocksPerGrid(size/THREADS_PER_BLOCK, 1, 1);
     dim3 threadsPerBlock(THREADS_PER_BLOCK, 1, 1);
 
     reverseArray<<< blocksPerGrid, threadsPerBlock >>>(d_in, d_out);
@@ -97,11 +101,11 @@ int main(int argc, char *argv[])
     /* print out the result */
     printf("Results: ");
     ncorrect = 0;
-    for (i = 0; i < ARRAY_SIZE; i++) {
-      if (h_out[i] == h_in[ARRAY_SIZE - (i+1)]) ncorrect += 1;
+    for (i = 0; i < size; i++) {
+      if (h_out[i] == h_in[size - (i+1)]) ncorrect += 1;
     }
     printf("Number of correctly reversed elements %d (%s)\n", ncorrect,
-           ncorrect == ARRAY_SIZE ? "Correct" : "INCORRECT");
+           ncorrect == size ? "Correct" : "INCORRECT");
     printf("\n");
 
     /* free device buffers */
