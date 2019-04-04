@@ -85,13 +85,13 @@ __kernel void reverse2d(__global float *d_output, __global float *d_input,
      * get global column index for this thread  
      * remember to add 1 to account for halo     
      */
-    // col ;
+    col = get_global_id(0) + 1;
 
     /*
      * get global row index for this thread  
      * remember to add 1 to account for halo    
      */
-    // row ;
+    row = get_global_id(1) + 1;
 
     /*
      * calculate linear index from col and row, for the centre
