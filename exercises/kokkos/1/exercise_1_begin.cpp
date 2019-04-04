@@ -52,8 +52,8 @@
 
 // EXERCISE: Include Kokkos_Core.hpp.
 //           cmath library unnecessary after.
-// #include <Kokkos_Core.hpp>
-#include <cmath>
+#include <Kokkos_Core.hpp>
+// #include <cmath>
 
 void checkSizes( int &N, int &M, int &S, int &nrepeat );
 
@@ -96,7 +96,7 @@ int main( int argc, char* argv[] )
   checkSizes( N, M, S, nrepeat );
 
   // EXERCISE: Initialize Kokkos runtime.
-  // Kokkos::initialize( argc, argv );
+  Kokkos::initialize( argc, argv );
 
   // Allocate y, x vectors and Matrix A:
   double * const y = new double[ N ];
@@ -105,23 +105,23 @@ int main( int argc, char* argv[] )
 
   // Initialize y vector.
   // EXERCISE: Convert outer loop to Kokkos::parallel_for.
-  for ( int i = 0; i < N; ++i ) {
+  Kokkos::parallel_for(N, KOKKOS_LAMBDA (int i) {
     y[ i ] = 1;
-  }
+  });
 
   // Initialize x vector.
   // EXERCISE: Convert outer loop to Kokkos::parallel_for.
-  for ( int i = 0; i < M; ++i ) {
+  Kokkos::parallel_for(M, KOKKOS_LAMBDA (int i) {
     x[ i ] = 1;
-  }
+  });
 
   // Initialize A matrix, note 2D indexing computation.
   // EXERCISE: Convert outer loop to Kokkos::parallel_for.
-  for ( int j = 0; j < N; ++j ) {
+  Kokkos::parallel_for(N, KOKKOS_LAMBDA (int j) {
     for ( int i = 0; i < M; ++i ) {
       A[ j * M + i ] = 1;
     }
-  }
+  });
 
   // Timer products.
   struct timeval begin, end;
@@ -133,15 +133,15 @@ int main( int argc, char* argv[] )
     double result = 0;
 
     // EXERCISE: Convert outer loop to Kokkos::parallel_reduce.
-    for ( int j = 0; j < N; ++j ) {
+    Kokkos::parallel_reduce(N, KOKKOS_LAMBDA (int j, double &sum) {
       double temp2 = 0;
 
       for ( int i = 0; i < M; ++i ) {
         temp2 += A[ j * M + i ] * x[ i ];
       }
 
-      result += y[ j ] * temp2;
-    }
+      sum += y[ j ] * temp2;
+    }, result);
 
     // Output result.
     if ( repeat == ( nrepeat - 1 ) ) {
@@ -177,7 +177,7 @@ int main( int argc, char* argv[] )
   delete[] x;
 
   // EXERCISE: finalize Kokkos runtime
-  // Kokkos::finalize();
+  Kokkos::finalize();
 
   return 0;
 }
