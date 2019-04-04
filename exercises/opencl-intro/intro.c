@@ -68,12 +68,12 @@ int main(int argc, char *argv[])
 
     /* run the kernel on the GPU */
     /* Part 2A: configure and launch kernel (un-comment and complete) */
-    /* size_t globalsize[1] = {  }; */
-    /* size_t localsize[1] = {  }; */
-    /* err = clSetKernelArg( ); */
-    /* checkOpenCLError(err, "setting kernel arguments"); */
-    /* err = clEnqueueNDRangeKernel( ); */
-    /* checkOpenCLError(err, "running kernel"); */
+    size_t globalsize[1] = { ARRAY_SIZE };
+    size_t localsize[1] = { THREADS_PER_WORK_GROUP };
+    err = clSetKernelArg(kernel, 0, sizeof(cl_mem), &d_a);
+    checkOpenCLError(err, "setting kernel arguments");
+    err = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, globalsize, localsize, 0, NULL, NULL );
+    checkOpenCLError(err, "running kernel");
 
     /* wait for all threads to complete */
     clFinish(queue);
