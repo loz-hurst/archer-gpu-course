@@ -47,12 +47,12 @@ __kernel void reverse1d_row(__global float *d_output, __global float *d_input,
      * calculate global column index for this thread  
      * remember to add 1 to account for halo     
      */
-    // col = ;
+    col = get_global_id(0) + 1;
 
     /*
      * loop over all rows of the image
      */
-    // for ( ; ; )
+    for (row = 1; row <= height; ++row)
     {
         /*
          * calculate linear index from col and row, for the centre

@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
     /* initialise OpenCL */
     err = initCLDevice(CL_DEVICE_TYPE_GPU, &ctxt, &queue);
     checkOpenCLError(err, "initCLDevice");
-    err = getCLKernel(ctxt, "kernels.c", "reverse1d_col", &kernel);
+    err = getCLKernel(ctxt, "kernels.c", "reverse1d_row", &kernel);
     checkOpenCLError(err, "getCLKernel");
 
     /* allocate memory on device */
@@ -118,6 +118,8 @@ int main(int argc, char *argv[])
 	err = clSetKernelArg(kernel, 2, sizeof(cl_mem), &d_edge);
 	checkOpenCLError(err, "setting kernel arguments");
 	err = clSetKernelArg(kernel, 3, sizeof(int), &width);
+	checkOpenCLError(err, "setting kernel arguments");
+	err = clSetKernelArg(kernel, 4, sizeof(int), &height);
 	checkOpenCLError(err, "setting kernel arguments");
 
 	size_t globalsize[1] = { HEIGHT };
