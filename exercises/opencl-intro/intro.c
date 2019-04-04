@@ -51,7 +51,8 @@ int main(int argc, char *argv[])
      * allocate memory on device
      */
     /* Part 1A: allocate device memory */
-    /* d_a = clCreateBuffer(...); */
+    d_a = clCreateBuffer(ctxt, CL_MEM_READ_WRITE, sz, NULL, &err);
+    checkOpenCLError(err, "clCreateBuffer");
 
     /* initialise host arrays */
     for (i = 0; i < ARRAY_SIZE; i++) {
@@ -62,7 +63,7 @@ int main(int argc, char *argv[])
     /* copy input array from host to GPU */
     /* Part 1B: copy host array h_a to device array d_a */
 
-    /* err = clEnqueueWriteBuffer(...);*/
+    err = clEnqueueWriteBuffer(queue, d_a, CL_TRUE, 0, sz, h_a, 0, NULL, NULL);
     checkOpenCLError(err, "buffer write");
 
     /* run the kernel on the GPU */
@@ -80,20 +81,22 @@ int main(int argc, char *argv[])
     /* copy the result array back to the host */
     /* Part 1C: copy device array d_a to host array h_out */
 
-    /* err = clEnqueueReadBuffer(...); */
+    err = clEnqueueReadBuffer(queue, d_a, CL_TRUE, 0, sz, h_out, 0, NULL, NULL);
     checkOpenCLError(err, "buffer read");
 
     /* print out the result */
     printf("Results: ");
     for (i = 0; i < ARRAY_SIZE; i++) {
-      printf("%d, ", h_out[i]);
+      printf("%d", h_out[i]);
+      if ( i < (ARRAY_SIZE - 1) )
+        printf(", ");
     }
     printf("\n\n");
 
     /* free device buffer */
     /* Part 1D: free d_a */
 
-    /* clReleaseMemObject(...);*/
+    clReleaseMemObject(d_a);
 
     /* free host buffers */
     free(h_a);
