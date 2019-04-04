@@ -129,13 +129,16 @@ int main(int argc, char *argv[])
 	/* wait for kernel to complete */
 	clFinish(queue);
 	
-	/* copy the data back from the output buffer on the device */
-	err = clEnqueueReadBuffer(queue, d_output, CL_TRUE, 0, memSize, gpu_output, 0, NULL, NULL);
-	checkOpenCLError(err, "buffer read");
-
-	/* copy the new data to the input buffer on the device */
-	err = clEnqueueWriteBuffer(queue, d_input, CL_TRUE, 0, memSize, gpu_output, 0, NULL, NULL);
-	checkOpenCLError(err, "buffer write");
+	// On all but the last loop swap the input and output buffers (so the output of the last iteration is the input to th next)
+	if ( i < ITERATIONS-1 ) {
+	  cl_mem tmp = d_input;
+	  d_input = d_output;
+	  d_output = tmp;
+	} else {
+          /* copy the data back from the output buffer on the device on the last loop */
+          err = clEnqueueReadBuffer(queue, d_output, CL_TRUE, 0, memSize, gpu_output, 0, NULL, NULL);
+          checkOpenCLError(err, "buffer read");
+	}
     }
     
     end_time_inc_data = get_current_time();
