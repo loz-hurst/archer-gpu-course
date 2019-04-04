@@ -70,39 +70,46 @@ int main (int argc, char **argv)
   
   
  
+   #pragma acc data copyin(old) copyout(new)
+   {
 
-  start_time = get_current_time();
-           
-  /* main loop */
-
-  for (iter=1;iter<=ITERATIONS; iter++)
-    {
+    start_time = get_current_time();
+             
+    /* main loop */
+  
+    #pragma acc parallel vector_length(512)
+    for (iter=1;iter<=ITERATIONS; iter++)
+      {
       
       /* perform stencil operation */
 
-      for (i=1;i<N+1;i++)
-	{
-	  for (j=1;j<N+1;j++)
-	    {
-	      new[i][j]=0.25*(old[i-1][j]+old[i+1][j]+old[i][j-1]+old[i][j+1]
-			      - edge[i][j]);
-	    }
-	}
-      
-      /* copy output back to input buffer */
-
-      for (i=1;i<N+1;i++)
-	{
-	  for (j=1;j<N+1;j++)
-	    {
-	      old[i][j]=new[i][j];
-	    }
-	}
+        #pragma acc loop
+        for (i=1;i<N+1;i++)
+  	{
+  	  for (j=1;j<N+1;j++)
+  	    {
+  	      new[i][j]=0.25*(old[i-1][j]+old[i+1][j]+old[i][j-1]+old[i][j+1]
+  			      - edge[i][j]);
+  	    }
+  	}
+        
+        /* copy output back to input buffer */
+  
+        #pragma acc loop
+        for (i=1;i<N+1;i++)
+  	{
+  	  for (j=1;j<N+1;j++)
+  	    {
+  	      old[i][j]=new[i][j];
+  	    }
+  	}
 
     
     } /* end of main loop */
       
-  end_time = get_current_time();
+    end_time = get_current_time();
+
+  }
 
       
 
