@@ -100,37 +100,31 @@ int main( int argc, char* argv[] )
 
   // EXERCISE: Create views of the right size.
 
+  {
   // 1. Device Views
-  // typedef Kokkos::View<double*>   ViewVectorType;
-  // typedef Kokkos::View<double**>  ViewMatrixType;
-  // ViewVectorType y( "y", N );
-  // ViewVectorType x( "x", M );
-  // ViewMatrixType A( "A", N, M );
-
-  // EXERCISE: This no longer needs allocation after views introduced...
-  //   Hint: If arrays are not allocated, they also do not need to be deallocated below
-  // Allocate y, x vectors and Matrix A:
-  double * const y = new double[ N ];
-  double * const x = new double[ M ];
-  double * const A = new double[ N * M ];
+  typedef Kokkos::View<double*>   ViewVectorType;
+  typedef Kokkos::View<double**>  ViewMatrixType;
+  ViewVectorType y( "y", N );
+  ViewVectorType x( "x", M );
+  ViewMatrixType A( "A", N, M );
 
   // Initialize y vector on host.
   // EXERCISE: Convert y to 1D View's member access API: x(i)
   for ( int i = 0; i < N; ++i ) {
-    y[ i ] = 1;
+    y(i) = 1;
   }
 
   // Initialize x vector on host.
   // EXERCISE: Convert x to 1D View's member access API: x(i)
   for ( int i = 0; i < M; ++i ) {
-    x[ i ] = 1;
+    x(i) = 1;
   }
 
   // Initialize A matrix on host, note 2D indexing computation.
   // EXERCISE: convert 'A' to use View's member access API: A(j,i)
   for ( int j = 0; j < N; ++j ) {
     for ( int i = 0; i < M; ++i ) {
-      A[ j * M + i ] = 1;
+      A(j, i) = 1;
     }
   }
 
@@ -148,10 +142,10 @@ int main( int argc, char* argv[] )
 
       // EXERCISE: Replace access with view access operators.
       for ( int i = 0; i < M; ++i ) {
-        temp2 += A[ j * M + i ] * x[ i ];
+        temp2 += A(j, i) * x(i);
       }
 
-      update += y[ j ] * temp2;
+      update += y(j) * temp2;
     }, result );
 
     // Output result.
@@ -182,11 +176,7 @@ int main( int argc, char* argv[] )
   // Print results (problem size, time and bandwidth in GB/s).
   printf( "  N( %d ) M( %d ) nrepeat ( %d ) problem( %g MB ) time( %g s ) bandwidth( %g GB/s )\n",
           N, M, nrepeat, Gbytes * 1000, time, Gbytes * nrepeat / time );
-
-  delete [] y;  //EXERCISE hint: ...
-  delete [] x;  //EXERCISE hint: ...
-  delete [] A;  //EXERCISE hint: ...
-
+  }
   Kokkos::finalize();
 
   return 0;
